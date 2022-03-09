@@ -1,7 +1,7 @@
 async function setupPlugin({ jobs, global, config }) {
     console.log(`Setting up the plugin`)
     global.url = `https://${config.DomainName}`
-    // //   console.log(global.url);
+
     global.options = {
         headers: {
             Authorization: `Bearer ${config.ApiKey}`,
@@ -96,7 +96,7 @@ async function closeFileForDBFS(request, global) {
     await response.json()
 }
 
-async function runEveryMinute({ jobs, global, storage, config, cache }) {
+async function runEveryHour({ jobs, global, storage, config, cache }) {
     let request = global.options
 
     /// java script present year
@@ -112,7 +112,6 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     })
 
     const handle = await createFileForDBFS(request, global)
-    console.log(handle)
 
     let data = await storage.get('data', null)
     if (data === null) {
@@ -120,10 +119,8 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     }
 
     for (let content of data) {
-        console.log(content)
-
         const contentBase64 = Buffer.from(content).toString('base64') + 'Cg=='
-        console.log(contentBase64)
+
         request = global.options
         request.body = JSON.stringify({
             handle: handle,
@@ -144,5 +141,5 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
 module.exports = {
     setupPlugin,
     exportEvents,
-    runEveryMinute,
+    runEveryHour,
 }
