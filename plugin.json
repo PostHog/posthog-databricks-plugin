@@ -1,18 +1,46 @@
 {
-    "name": "<TODO: your plugin name>",
-    "url": "<TODO: Your Plugin URL here>",
-    "description": "<TODO: Your Plugin description here>",
+    "name": "posthog databricks plugin",
+    "url": "https://github.com/samcaspus/posthog-databricks-plugin",
+    "description": "The PostHog Databrics plugin allows you to track your users' interactions with your website using the Databrics platform.",
     "main": "index.js",
     "posthogVersion": ">= 1.25.0",
     "config": [
         {
-            "markdown": "<TODO: your plugin config, remove if none>"
+            "markdown": "This plugin will enable users with databricks data ingestion capabilities to track their interactions"
         },
         {
-            "key": "greeting",
-            "name": "What greeting would you like to use?",
+            "key": "DomainName",
+            "name": "Domain Name",
             "type": "string",
-            "default": "Hello World!",
+            "default": "",
+            "required": true
+        },
+        {
+            "key": "ApiKey",
+            "name": "API Key",
+            "type": "string",
+            "default": "",
+            "required": true
+        },
+        {
+            "key": "dbName",
+            "name": "Database Name",
+            "type": "string",
+            "default": "",
+            "required": true
+        },
+        {
+            "key": "OverWrite",
+            "name": "Overwrite",
+            "type": "string",
+            "default": "true",
+            "required": true
+        },
+        {
+            "key": "eventsToIgnore",
+            "name": "Events to Ignore",
+            "type": "string",
+            "default": "$autocapture",
             "required": false
         }
     ]
