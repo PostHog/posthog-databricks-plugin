@@ -145,10 +145,11 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
   let month = new Date().getMonth() + 1;
   let day = new Date().getDate();
   let hour = new Date().getHours();
+  let min = new Date().getMinutes();
 
   request.body = JSON.stringify({
-    path: `/${config.dbName}/${year}/${month}/${day}/hour_${hour}.csv`,
-    overwrite: true,
+    path: `/${config.dbName}/${year}/${month}/${day}/${hour}_${min}_file.csv`,
+    overwrite: false,
   });
 
   let handle = await createFileForDBFS(request, global);
