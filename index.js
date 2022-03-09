@@ -108,7 +108,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
 
     request.body = JSON.stringify({
         path: `/${config.dbName}/${year}/${month}/${day}/file_${hour}_${min}.csv`,
-        overwrite: false,
+        overwrite: `${config.OverWrite}`,
     })
 
     const handle = await createFileForDBFS(request, global)
