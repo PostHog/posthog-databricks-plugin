@@ -31,8 +31,6 @@ function transformEventToRow(fullEvent) {
   const ip = properties?.["$ip"] || fullEvent.ip;
   const timestamp =
     fullEvent.timestamp || properties?.timestamp || now || sent_at;
-  let ingestedProperties = properties;
-  let elements = [];
 
   // only move prop to elements for the $autocapture action
   if (event === "$autocapture" && properties?.["$elements"]) {
@@ -112,8 +110,7 @@ async function createFileForDBFS(request, global) {
     request,
     "POST"
   );
-  let result = await response.json();
-  console.log("handle came here", result);
+  const result = await response.json();
   return result.handle;
 }
 
@@ -123,8 +120,7 @@ async function uploadFileForDBFS(request, global) {
     request,
     "POST"
   );
-  let result = await response.json();
-  return result;
+  await response.json();
 }
 
 async function closeFileForDBFS(request, global) {
@@ -133,26 +129,25 @@ async function closeFileForDBFS(request, global) {
     request,
     "POST"
   );
-  let result = await response.json();
-  return result;
+  await response.json();
 }
 
 async function runEveryMinute({ jobs, global, storage, config, cache }) {
   let request = global.options;
 
   /// java script present year
-  let year = new Date().getFullYear();
-  let month = new Date().getMonth() + 1;
-  let day = new Date().getDate();
-  let hour = new Date().getHours();
-  let min = new Date().getMinutes();
+  const year = new Date().getFullYear();
+  const month = new Date().getMonth() + 1;
+  const day = new Date().getDate();
+  const hour = new Date().getHours();
+  const min = new Date().getMinutes();
 
   request.body = JSON.stringify({
-    path: `/${config.dbName}/${year}/${month}/${day}/${hour}_${min}_file.csv`,
+    path: `/${config.dbName}/${year}/${month}/${day}/file_${hour}_${min}.csv`,
     overwrite: false,
   });
 
-  let handle = await createFileForDBFS(request, global);
+  const handle = await createFileForDBFS(request, global);
   console.log(handle);
 
   let data = await storage.get("data", null);
@@ -165,13 +160,12 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
 
     const contentBase64 = Buffer.from(content).toString("base64") + "Cg==";
     console.log(contentBase64);
-    let request = global.options;
+    request = global.options;
     request.body = JSON.stringify({
       handle: handle,
       data: contentBase64,
     });
-    let response = await uploadFileForDBFS(request, global);
-    console.log("uploaded", response);
+    await uploadFileForDBFS(request, global);
   }
 
   await storage.set("data", []);
@@ -180,8 +174,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     handle: handle,
   });
 
-  let response = await closeFileForDBFS(request, global);
-  console.log("closed", response);
+  await closeFileForDBFS(request, global);
 }
 
 module.exports = {
