@@ -26,21 +26,14 @@
             "key": "dbName",
             "name": "Database Name",
             "type": "string",
-            "default": "",
-            "required": true
-        },
-        {
-            "key": "OverWrite",
-            "name": "Overwrite",
-            "type": "string",
-            "default": "true",
+            "default": "posthog",
             "required": true
         },
         {
             "key": "eventsToIgnore",
             "name": "Events to Ignore",
             "type": "string",
-            "default": "$autocapture",
+            "default": "$none",
             "required": false
         }
     ]

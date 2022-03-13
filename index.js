@@ -17,6 +17,8 @@ function transformEventToRow(fullEvent) {
         fullEvent
     const ip = properties?.['$ip'] || fullEvent.ip
     const timestamp = fullEvent.timestamp || properties?.timestamp || now || sent_at
+    let ingestedProperties = null
+    let elements = null
 
     // only move prop to elements for the $autocapture action
     if (event === '$autocapture' && properties?.['$elements']) {
@@ -33,6 +35,10 @@ function transformEventToRow(fullEvent) {
         site_url,
         timestamp,
         uuid: uuid,
+        properties: JSON.stringify(ingestedProperties != null ? ingestedProperties : {}),
+        elements: JSON.stringify(elements != null ? elements : []),
+        people_set: JSON.stringify($set ? $set : {}),
+        people_set_once: JSON.stringify($set_once ? $set_once : {}),
     }
 }
 
@@ -48,9 +54,11 @@ async function exportEvents(events, { jobs, global, config, storage }) {
         .map((row) => {
             const keys = Object.keys(row)
             const values = keys.map((key) => row[key])
-            return values.join(',') + '\n'
+            return values.join('|') + '\n'
         })
+
     rows = rows.join().split('\n')
+    console.log(JSON.stringify(rows))
 
     let data = await storage.get('data', null)
     if (data === null) {
@@ -58,7 +66,7 @@ async function exportEvents(events, { jobs, global, config, storage }) {
     }
     rows.forEach((row) => {
         if (row.length >= 0) {
-            if (row[0] === ',') {
+            if (row[0] === ',' || row[0] === '|') {
                 row = row.substring(1)
             }
             data.push(row)
@@ -96,7 +104,7 @@ async function closeFileForDBFS(request, global) {
     await response.json()
 }
 
-async function runEveryHour({ jobs, global, storage, config, cache }) {
+async function runEveryMinute({ jobs, global, storage, config, cache }) {
     let request = global.options
 
     /// java script present year
@@ -107,15 +115,20 @@ async function runEveryHour({ jobs, global, storage, config, cache }) {
     const min = new Date().getMinutes()
 
     request.body = JSON.stringify({
-        path: `/${config.dbName}/${year}/${month}/${day}/file_${hour}_${min}.csv`,
-        overwrite: `${config.OverWrite}`,
+        path: `/tmp/posthog.csv`,
+        overwrite: `true`,
     })
 
     const handle = await createFileForDBFS(request, global)
+    console.log('handle', handle)
 
     let data = await storage.get('data', null)
     if (data === null) {
         data = []
+    } else {
+        data.unshift(
+            `event|distinct_id|team_id|ip|site_url|timestamp|uuid|properties|elements|people_set|people_set_once`
+        )
     }
 
     for (let content of data) {
@@ -127,6 +140,7 @@ async function runEveryHour({ jobs, global, storage, config, cache }) {
             data: contentBase64,
         })
         await uploadFileForDBFS(request, global)
+        console.log('data uploaded', request.body)
     }
 
     await storage.set('data', [])
@@ -136,10 +150,11 @@ async function runEveryHour({ jobs, global, storage, config, cache }) {
     })
 
     await closeFileForDBFS(request, global)
+    console.log('closed', request.body)
 }
 
 module.exports = {
     setupPlugin,
     exportEvents,
-    runEveryHour,
+    runEveryMinute,
 }
