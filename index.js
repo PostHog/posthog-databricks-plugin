@@ -9,6 +9,30 @@ async function setupPlugin({ jobs, global, config }) {
         },
     }
 
+    let request = global.options
+    request.body = request.body = JSON.stringify({
+        path: `/tmp/posthog_upload.py`,
+        overwrite: `true`,
+    })
+
+    const handle = await createFileForDBFS(request, global)
+    console.log('handle for creation of job', handle)
+
+    request.body = JSON.stringify({
+        handle: handle,
+        data: `aW1wb3J0IHN5cwppbXBvcnQgcGFuZGFzIGFzIHBkCgpkZiA9IHBkLnJlYWRfY3N2KCcvZGJmcy90bXAvcG9zdGhvZy5jc3YnLCBzZXA9J3wnLGRlbGltaXRlcj1Ob25lKQpmcm9tIHB5c3Bhcmsuc3FsLnR5cGVzIGltcG9ydCAqCgpkZWYgZXF1aXZhbGVudF90eXBlKGYpOgogIGlmIGYgPT0gJ2RhdGV0aW1lNjRbbnNdJzogcmV0dXJuIERhdGVUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDY0JzogcmV0dXJuIExvbmdUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDMyJzogcmV0dXJuIEludGVnZXJUeXBlKCkKICBlbGlmIGYgPT0gJ2Zsb2F0NjQnOiByZXR1cm4gRmxvYXRUeXBlKCkKICBlbHNlOiByZXR1cm4gU3RyaW5nVHlwZSgpCgpkZWYgZGVmaW5lX3N0cnVjdHVyZShzdHJpbmcsIGZvcm1hdF90eXBlKToKICB0cnk6IHR5cG8gPSBlcXVpdmFsZW50X3R5cGUoZm9ybWF0X3R5cGUpCiAgZXhjZXB0OiB0eXBvID0gU3RyaW5nVHlwZSgpCiAgcmV0dXJuIFN0cnVjdEZpZWxkKHN0cmluZywgdHlwbykKCmRlZiBwYW5kYXNfdG9fc3BhcmsoZGZfcGFuZGFzKToKICBjb2x1bW5zID0gbGlzdChkZl9wYW5kYXMuY29sdW1ucykKICB0eXBlcyA9IGxpc3QoZGZfcGFuZGFzLmR0eXBlcykKICBzdHJ1Y3RfbGlzdCA9IFtdCiAgZm9yIGNvbHVtbiwgdHlwbyBpbiB6aXAoY29sdW1ucywgdHlwZXMpOiAKICAgIHN0cnVjdF9saXN0LmFwcGVuZChkZWZpbmVfc3RydWN0dXJlKGNvbHVtbiwgdHlwbykpCiAgcF9zY2hlbWEgPSBTdHJ1Y3RUeXBlKHN0cnVjdF9saXN0KQogIHJldHVybiBzcWxDb250ZXh0LmNyZWF0ZURhdGFGcmFtZShkZl9wYW5kYXMsIHBfc2NoZW1hKSAKCgpzZGYgPSBwYW5kYXNfdG9fc3BhcmsoZGYpCnBlcm1hbmVudF90YWJsZV9uYW1lID0gc3lzLmFyZ3ZbMV0KCnRyeToKICAgIHNkZi53cml0ZS5zYXZlQXNUYWJsZShwZXJtYW5lbnRfdGFibGVfbmFtZSkKZXhjZXB0OgogICAgc2RmLndyaXRlLmluc2VydEludG8ocGVybWFuZW50X3RhYmxlX25hbWUsb3ZlcndyaXRlPUZhbHNlKQoK`,
+    })
+
+    await uploadFileForDBFS(request, global)
+    console.log('handle for upload of job', handle)
+
+    request.body = JSON.stringify({
+        handle: handle,
+    })
+
+    await closeFileForDBFS(request, global)
+    console.log('handle for closing of job', handle)
+
     global.eventsToIgnore = (config.eventsToIgnore || '').split(',').map((v) => v.trim())
 }
 
@@ -58,7 +82,6 @@ async function exportEvents(events, { jobs, global, config, storage }) {
         })
 
     rows = rows.join().split('\n')
-    console.log(JSON.stringify(rows))
 
     let data = await storage.get('data', null)
     if (data === null) {
@@ -106,9 +129,10 @@ async function closeFileForDBFS(request, global) {
 
 async function runEveryMinute({ jobs, global, storage, config, cache }) {
     let request = global.options
-
+    let isDataNull = false
+    let job_id = null
     request.body = JSON.stringify({
-        path: `/tmp/posthog.csv`,
+        path: `${config.fileName}`,
         overwrite: `true`,
     })
 
@@ -125,6 +149,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     }
 
     for (let content of data) {
+        isDataNull = true
         const contentBase64 = Buffer.from(content).toString('base64') + 'Cg=='
 
         request = global.options
@@ -144,6 +169,78 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
 
     await closeFileForDBFS(request, global)
     console.log('closed', request.body)
+
+    if (isDataNull) {
+        request.body = JSON.stringify({
+            name: 'A python job to push data into db',
+            tasks: [
+                {
+                    task_key: 'python',
+                    description: 'Extracts session data from events',
+                    depends_on: [],
+                    existing_cluster_id: '0302-165224-oizcwnm0',
+                    spark_python_task: {
+                        python_file: 'dbfs:/tmp/posthog_upload.py',
+                    },
+                    libraries: [],
+                    timeout_seconds: 86400,
+                    max_retries: 3,
+                    min_retry_interval_millis: 2000,
+                    retry_on_timeout: false,
+                },
+            ],
+            job_clusters: [
+                {
+                    job_cluster_key: 'auto_scaling_cluster',
+                    new_cluster: {
+                        spark_version: '7.3.x-scala2.12',
+                        node_type_id: 'i3.xlarge',
+                        spark_conf: {
+                            'spark.speculation': true,
+                        },
+                        aws_attributes: {
+                            availability: 'SPOT',
+                            zone_id: 'us-west-2a',
+                        },
+                        autoscale: {
+                            min_workers: 2,
+                            max_workers: 16,
+                        },
+                    },
+                },
+            ],
+            timeout_seconds: 86400,
+            max_concurrent_runs: 10,
+            format: 'MULTI_TASK',
+        })
+
+        let job_id_to_drop = await cache.get('job_id')
+        if (job_id_to_drop != null) {
+            console.log('time to delete job', job_id_to_drop)
+            request.body = JSON.stringify({
+                job_id: job_id_to_drop,
+            })
+            let response = await fetchWithRetry(`${global.url}/api/2.1/jobs/delete`, request, 'POST')
+            result = await response.json()
+            console.log('result', result)
+        }
+
+        let response = await fetchWithRetry(`${global.url}/api/2.1/jobs/create`, request, 'POST')
+        let result = await response.json()
+        console.log('result', result)
+        job_id = result.job_id
+        console.log('job_id', job_id)
+
+        request.body = JSON.stringify({
+            job_id: job_id,
+            python_params: [`${config.dbName}`],
+        })
+
+        response = await fetchWithRetry(`${global.url}/api/2.1/jobs/run-now`, request, 'POST')
+        result = await response.json()
+        console.log('result', result)
+        await cache.set('job_id', job_id)
+    }
 }
 
 module.exports = {
