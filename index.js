@@ -178,7 +178,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
                     task_key: 'python',
                     description: 'Extracts session data from events',
                     depends_on: [],
-                    existing_cluster_id: '0302-165224-oizcwnm0',
+                    existing_cluster_id: `${config.clusterId}`,
                     spark_python_task: {
                         python_file: 'dbfs:/tmp/posthog_upload.py',
                     },
@@ -215,13 +215,14 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
         })
 
         let job_id_to_drop = await cache.get('job_id')
+        /// this section of code can be removed based on jobs should be deleted or not
         if (job_id_to_drop != null) {
             console.log('time to delete job', job_id_to_drop)
             request.body = JSON.stringify({
                 job_id: job_id_to_drop,
             })
             let response = await fetchWithRetry(`${global.url}/api/2.1/jobs/delete`, request, 'POST')
-            result = await response.json()
+            let result = await response.json()
             console.log('result', result)
         }
 

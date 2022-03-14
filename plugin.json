@@ -26,8 +26,16 @@
             "key": "fileName",
             "name": "File Name",
             "type": "string",
-            "default": "",
+            "default": "/tmp/posthog.csv",
             "description": "Default filename created in the dbfs please update incase you dont want to override thid file",
+            "required": true
+        },
+        {
+            "key": "clusterId",
+            "name": "Cluster Id",
+            "type": "string",
+            "default": "",
+            "description": "Get cluster details from the databricks portal",
             "required": true
         },
         {
@@ -41,7 +49,7 @@
             "key": "eventsToIgnore",
             "name": "Events to Ignore",
             "type": "string",
-            "default": "$none",
+            "default": "",
             "required": false
         }
     ]
