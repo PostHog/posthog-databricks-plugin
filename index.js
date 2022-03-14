@@ -107,13 +107,6 @@ async function closeFileForDBFS(request, global) {
 async function runEveryMinute({ jobs, global, storage, config, cache }) {
     let request = global.options
 
-    /// java script present year
-    const year = new Date().getFullYear()
-    const month = new Date().getMonth() + 1
-    const day = new Date().getDate()
-    const hour = new Date().getHours()
-    const min = new Date().getMinutes()
-
     request.body = JSON.stringify({
         path: `/tmp/posthog.csv`,
         overwrite: `true`,
