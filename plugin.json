@@ -23,10 +23,18 @@
             "required": true
         },
         {
+            "key": "fileName",
+            "name": "File Name",
+            "type": "string",
+            "default": "",
+            "description": "Default filename created in the dbfs please update incase you dont want to override thid file",
+            "required": true
+        },
+        {
             "key": "dbName",
             "name": "Database Name",
             "type": "string",
-            "default": "posthog",
+            "default": "",
             "required": true
         },
         {
