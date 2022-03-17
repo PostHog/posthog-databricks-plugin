@@ -1,5 +1,4 @@
 async function setupPlugin({ jobs, global, config }) {
-    console.log(`Setting up the plugin`)
     global.url = `https://${config.DomainName}`
 
     global.options = {
@@ -9,29 +8,35 @@ async function setupPlugin({ jobs, global, config }) {
         },
     }
 
-    let request = global.options
-    request.body = request.body = JSON.stringify({
-        path: `/tmp/posthog_upload.py`,
-        overwrite: `true`,
-    })
+    const createFileRequest = { 
+        ...global.options, 
+        body: JSON.stringify({
+            path: `/tmp/posthog_upload.py`, // let's allow this to be configurable?
+            overwrite: `true`,
+        })
+    }
 
-    const handle = await createFileForDBFS(request, global)
-    console.log('handle for creation of job', handle)
+    const handle = await createFileForDBFS(createFileRequest, global)
+    
+    const uploadFileRequest = { 
+        ...global.options, 
+        body: JSON.stringify({
+            handle: handle,
+            data: `aW1wb3J0IHN5cwppbXBvcnQgcGFuZGFzIGFzIHBkCgpkZiA9IHBkLnJlYWRfY3N2KCcvZGJmcy90bXAvcG9zdGhvZy5jc3YnLCBzZXA9J3wnLGRlbGltaXRlcj1Ob25lKQpmcm9tIHB5c3Bhcmsuc3FsLnR5cGVzIGltcG9ydCAqCgpkZWYgZXF1aXZhbGVudF90eXBlKGYpOgogIGlmIGYgPT0gJ2RhdGV0aW1lNjRbbnNdJzogcmV0dXJuIERhdGVUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDY0JzogcmV0dXJuIExvbmdUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDMyJzogcmV0dXJuIEludGVnZXJUeXBlKCkKICBlbGlmIGYgPT0gJ2Zsb2F0NjQnOiByZXR1cm4gRmxvYXRUeXBlKCkKICBlbHNlOiByZXR1cm4gU3RyaW5nVHlwZSgpCgpkZWYgZGVmaW5lX3N0cnVjdHVyZShzdHJpbmcsIGZvcm1hdF90eXBlKToKICB0cnk6IHR5cG8gPSBlcXVpdmFsZW50X3R5cGUoZm9ybWF0X3R5cGUpCiAgZXhjZXB0OiB0eXBvID0gU3RyaW5nVHlwZSgpCiAgcmV0dXJuIFN0cnVjdEZpZWxkKHN0cmluZywgdHlwbykKCmRlZiBwYW5kYXNfdG9fc3BhcmsoZGZfcGFuZGFzKToKICBjb2x1bW5zID0gbGlzdChkZl9wYW5kYXMuY29sdW1ucykKICB0eXBlcyA9IGxpc3QoZGZfcGFuZGFzLmR0eXBlcykKICBzdHJ1Y3RfbGlzdCA9IFtdCiAgZm9yIGNvbHVtbiwgdHlwbyBpbiB6aXAoY29sdW1ucywgdHlwZXMpOiAKICAgIHN0cnVjdF9saXN0LmFwcGVuZChkZWZpbmVfc3RydWN0dXJlKGNvbHVtbiwgdHlwbykpCiAgcF9zY2hlbWEgPSBTdHJ1Y3RUeXBlKHN0cnVjdF9saXN0KQogIHJldHVybiBzcWxDb250ZXh0LmNyZWF0ZURhdGFGcmFtZShkZl9wYW5kYXMsIHBfc2NoZW1hKSAKCgpzZGYgPSBwYW5kYXNfdG9fc3BhcmsoZGYpCnBlcm1hbmVudF90YWJsZV9uYW1lID0gc3lzLmFyZ3ZbMV0KCnRyeToKICAgIHNkZi53cml0ZS5zYXZlQXNUYWJsZShwZXJtYW5lbnRfdGFibGVfbmFtZSkKZXhjZXB0OgogICAgc2RmLndyaXRlLmluc2VydEludG8ocGVybWFuZW50X3RhYmxlX25hbWUsb3ZlcndyaXRlPUZhbHNlKQoK`,
+        })
+    }
 
-    request.body = JSON.stringify({
-        handle: handle,
-        data: `aW1wb3J0IHN5cwppbXBvcnQgcGFuZGFzIGFzIHBkCgpkZiA9IHBkLnJlYWRfY3N2KCcvZGJmcy90bXAvcG9zdGhvZy5jc3YnLCBzZXA9J3wnLGRlbGltaXRlcj1Ob25lKQpmcm9tIHB5c3Bhcmsuc3FsLnR5cGVzIGltcG9ydCAqCgpkZWYgZXF1aXZhbGVudF90eXBlKGYpOgogIGlmIGYgPT0gJ2RhdGV0aW1lNjRbbnNdJzogcmV0dXJuIERhdGVUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDY0JzogcmV0dXJuIExvbmdUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDMyJzogcmV0dXJuIEludGVnZXJUeXBlKCkKICBlbGlmIGYgPT0gJ2Zsb2F0NjQnOiByZXR1cm4gRmxvYXRUeXBlKCkKICBlbHNlOiByZXR1cm4gU3RyaW5nVHlwZSgpCgpkZWYgZGVmaW5lX3N0cnVjdHVyZShzdHJpbmcsIGZvcm1hdF90eXBlKToKICB0cnk6IHR5cG8gPSBlcXVpdmFsZW50X3R5cGUoZm9ybWF0X3R5cGUpCiAgZXhjZXB0OiB0eXBvID0gU3RyaW5nVHlwZSgpCiAgcmV0dXJuIFN0cnVjdEZpZWxkKHN0cmluZywgdHlwbykKCmRlZiBwYW5kYXNfdG9fc3BhcmsoZGZfcGFuZGFzKToKICBjb2x1bW5zID0gbGlzdChkZl9wYW5kYXMuY29sdW1ucykKICB0eXBlcyA9IGxpc3QoZGZfcGFuZGFzLmR0eXBlcykKICBzdHJ1Y3RfbGlzdCA9IFtdCiAgZm9yIGNvbHVtbiwgdHlwbyBpbiB6aXAoY29sdW1ucywgdHlwZXMpOiAKICAgIHN0cnVjdF9saXN0LmFwcGVuZChkZWZpbmVfc3RydWN0dXJlKGNvbHVtbiwgdHlwbykpCiAgcF9zY2hlbWEgPSBTdHJ1Y3RUeXBlKHN0cnVjdF9saXN0KQogIHJldHVybiBzcWxDb250ZXh0LmNyZWF0ZURhdGFGcmFtZShkZl9wYW5kYXMsIHBfc2NoZW1hKSAKCgpzZGYgPSBwYW5kYXNfdG9fc3BhcmsoZGYpCnBlcm1hbmVudF90YWJsZV9uYW1lID0gc3lzLmFyZ3ZbMV0KCnRyeToKICAgIHNkZi53cml0ZS5zYXZlQXNUYWJsZShwZXJtYW5lbnRfdGFibGVfbmFtZSkKZXhjZXB0OgogICAgc2RmLndyaXRlLmluc2VydEludG8ocGVybWFuZW50X3RhYmxlX25hbWUsb3ZlcndyaXRlPUZhbHNlKQoK`,
-    })
 
-    await uploadFileForDBFS(request, global)
-    console.log('handle for upload of job', handle)
+    await uploadFileForDBFS(uploadFileForRequest, global)
 
-    request.body = JSON.stringify({
-        handle: handle,
-    })
+    const closeFileRequest = { 
+        ...global.options, 
+        body: JSON.stringify({
+            handle: handle,
+        })
+    }
 
-    await closeFileForDBFS(request, global)
-    console.log('handle for closing of job', handle)
+    await closeFileForDBFS(closeFileRequest, global)
 
     global.eventsToIgnore = (config.eventsToIgnore || '').split(',').map((v) => v.trim())
 }
@@ -60,21 +65,16 @@ function transformEventToRow(fullEvent) {
         site_url,
         timestamp,
         uuid: uuid,
-        properties: JSON.stringify(ingestedProperties != null ? ingestedProperties : {}),
-        elements: JSON.stringify(elements != null ? elements : []),
-        people_set: JSON.stringify($set ? $set : {}),
-        people_set_once: JSON.stringify($set_once ? $set_once : {}),
+        properties: JSON.stringify(ingestedProperties ?? {}),
+        elements: JSON.stringify(elements ?? []),
+        people_set: JSON.stringify($set ?? {}),
+        people_set_once: JSON.stringify($set_once ?? {}),
     }
 }
 
 async function exportEvents(events, { global, storage }) {
     let rows = events
-        .filter((event) => {
-            if (global.eventsToIgnore.includes(event.event)) {
-                return false
-            }
-            return true
-        })
+        .filter((event) => global.eventsToIgnore.includes(event.event))
         .map(transformEventToRow)
         .map((row) => {
             const keys = Object.keys(row)
@@ -83,13 +83,11 @@ async function exportEvents(events, { global, storage }) {
         })
 
     rows = rows.join().split('\n')
-    let data = []
-    if (!global.tests) {
-        data = await storage.get('data', null)
-    }
-    if (data === null) {
-        data = []
-    }
+
+
+    const data = await storage.get('data', [])
+
+
     rows.forEach((row) => {
         if (row.length >= 0) {
             if (row[0] === ',' || row[0] === '|') {
@@ -146,7 +144,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     console.log('handle', handle)
 
     let data = await storage.get('data', null)
-    if (data === null) {
+    if (!data) {
         data = []
     } else {
         data.unshift(
@@ -154,7 +152,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
         )
     }
 
-    for (let content of data) {
+    for (const content of data) {
         isDataNull = true
         const contentBase64 = Buffer.from(content).toString('base64') + 'Cg=='
 
@@ -220,15 +218,14 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
             format: 'MULTI_TASK',
         })
 
-        let job_id_to_drop = await cache.get('job_id')
+        const jobIdToDrop = await cache.get('job_id')
         /// this section of code can be removed based on jobs should be deleted or not
-        if (job_id_to_drop != null) {
-            console.log('time to delete job', job_id_to_drop)
+        if (jobIdToDrop) {
             request.body = JSON.stringify({
-                job_id: job_id_to_drop,
+                job_id: jobIdToDrop,
             })
-            let response = await fetchWithRetry(`${global.url}/api/2.1/jobs/delete`, request, 'POST')
-            let result = await response.json()
+            const response = await fetchWithRetry(`${global.url}/api/2.1/jobs/delete`, request, 'POST')
+            const result = await response.json()
             console.log('result', result)
         }
 
