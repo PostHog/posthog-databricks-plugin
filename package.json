@@ -1,0 +1,23 @@
+{
+    "name": "posthog-databricks-plugin",
+    "version": "1.0.0",
+    "description": "posthog databricks plugin",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/samcaspus/posthog-databricks-plugin.git"
+    },
+    "author": "samcaspus & merrcury",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/samcaspus/posthog-databricks-plugin/issues"
+    },
+    "devDependencies": {
+        "@posthog/plugin-scaffold": "0.10.0",
+        "jest": "^27.0.4"
+    },
+    "homepage": "https://github.com/samcaspus/posthog-databricks-plugin#readme"
+}

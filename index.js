@@ -49,6 +49,7 @@ function transformEventToRow(fullEvent) {
     let ingestedProperties = null
     let elements = null
 
+    console.log(properties)
     // only move prop to elements for the $autocapture action
     if (event === '$autocapture' && properties?.['$elements']) {
         const { $elements, ...props } = properties
@@ -71,7 +72,7 @@ function transformEventToRow(fullEvent) {
     }
 }
 
-async function exportEvents(events, { jobs, global, config, storage }) {
+async function exportEvents(events, { global, storage }) {
     let rows = events
         .filter((event) => global.eventsToIgnore.includes(event.event))
         .map(transformEventToRow)
@@ -83,7 +84,9 @@ async function exportEvents(events, { jobs, global, config, storage }) {
 
     rows = rows.join().split('\n')
 
+
     const data = await storage.get('data', [])
+
 
     rows.forEach((row) => {
         if (row.length >= 0) {
@@ -93,7 +96,10 @@ async function exportEvents(events, { jobs, global, config, storage }) {
             data.push(row)
         }
     })
-    await storage.set('data', data)
+    if (!global.tests) {
+        await storage.set('data', data)
+    }
+    return data
 }
 
 async function fetchWithRetry(url, options = {}, method = 'GET', isRetry = false) {
@@ -245,4 +251,5 @@ module.exports = {
     setupPlugin,
     exportEvents,
     runEveryMinute,
+    transformEventToRow,
 }
