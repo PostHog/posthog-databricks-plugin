@@ -8,32 +8,31 @@ async function setupPlugin({ jobs, global, config }) {
         },
     }
 
-    const createFileRequest = { 
-        ...global.options, 
+    const createFileRequest = {
+        ...global.options,
         body: JSON.stringify({
-            path: `/tmp/posthog_upload.py`, // let's allow this to be configurable?
+            path: `${config.pythonSupportFileUpload}`, // let's allow this to be configurable?
             overwrite: `true`,
-        })
+        }),
     }
 
     const handle = await createFileForDBFS(createFileRequest, global)
-    
-    const uploadFileRequest = { 
-        ...global.options, 
+
+    const uploadFileRequest = {
+        ...global.options,
         body: JSON.stringify({
             handle: handle,
-            data: `aW1wb3J0IHN5cwppbXBvcnQgcGFuZGFzIGFzIHBkCgpkZiA9IHBkLnJlYWRfY3N2KCcvZGJmcy90bXAvcG9zdGhvZy5jc3YnLCBzZXA9J3wnLGRlbGltaXRlcj1Ob25lKQpmcm9tIHB5c3Bhcmsuc3FsLnR5cGVzIGltcG9ydCAqCgpkZWYgZXF1aXZhbGVudF90eXBlKGYpOgogIGlmIGYgPT0gJ2RhdGV0aW1lNjRbbnNdJzogcmV0dXJuIERhdGVUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDY0JzogcmV0dXJuIExvbmdUeXBlKCkKICBlbGlmIGYgPT0gJ2ludDMyJzogcmV0dXJuIEludGVnZXJUeXBlKCkKICBlbGlmIGYgPT0gJ2Zsb2F0NjQnOiByZXR1cm4gRmxvYXRUeXBlKCkKICBlbHNlOiByZXR1cm4gU3RyaW5nVHlwZSgpCgpkZWYgZGVmaW5lX3N0cnVjdHVyZShzdHJpbmcsIGZvcm1hdF90eXBlKToKICB0cnk6IHR5cG8gPSBlcXVpdmFsZW50X3R5cGUoZm9ybWF0X3R5cGUpCiAgZXhjZXB0OiB0eXBvID0gU3RyaW5nVHlwZSgpCiAgcmV0dXJuIFN0cnVjdEZpZWxkKHN0cmluZywgdHlwbykKCmRlZiBwYW5kYXNfdG9fc3BhcmsoZGZfcGFuZGFzKToKICBjb2x1bW5zID0gbGlzdChkZl9wYW5kYXMuY29sdW1ucykKICB0eXBlcyA9IGxpc3QoZGZfcGFuZGFzLmR0eXBlcykKICBzdHJ1Y3RfbGlzdCA9IFtdCiAgZm9yIGNvbHVtbiwgdHlwbyBpbiB6aXAoY29sdW1ucywgdHlwZXMpOiAKICAgIHN0cnVjdF9saXN0LmFwcGVuZChkZWZpbmVfc3RydWN0dXJlKGNvbHVtbiwgdHlwbykpCiAgcF9zY2hlbWEgPSBTdHJ1Y3RUeXBlKHN0cnVjdF9saXN0KQogIHJldHVybiBzcWxDb250ZXh0LmNyZWF0ZURhdGFGcmFtZShkZl9wYW5kYXMsIHBfc2NoZW1hKSAKCgpzZGYgPSBwYW5kYXNfdG9fc3BhcmsoZGYpCnBlcm1hbmVudF90YWJsZV9uYW1lID0gc3lzLmFyZ3ZbMV0KCnRyeToKICAgIHNkZi53cml0ZS5zYXZlQXNUYWJsZShwZXJtYW5lbnRfdGFibGVfbmFtZSkKZXhjZXB0OgogICAgc2RmLndyaXRlLmluc2VydEludG8ocGVybWFuZW50X3RhYmxlX25hbWUsb3ZlcndyaXRlPUZhbHNlKQoK`,
-        })
+            data: `aW1wb3J0IHN5cwppbXBvcnQgcGFuZGFzIGFzIHBkCgpkZiA9IHBkLnJlYWRfY3N2KCcvZGJmcy97fScuZm9ybWF0KHN5cy5hcmd2WzJdKSwgc2VwPSd8JyxkZWxpbWl0ZXI9Tm9uZSkKZnJvbSBweXNwYXJrLnNxbC50eXBlcyBpbXBvcnQgKgoKZGVmIGVxdWl2YWxlbnRfdHlwZShmKToKICBpZiBmID09ICdkYXRldGltZTY0W25zXSc6IHJldHVybiBEYXRlVHlwZSgpCiAgZWxpZiBmID09ICdpbnQ2NCc6IHJldHVybiBMb25nVHlwZSgpCiAgZWxpZiBmID09ICdpbnQzMic6IHJldHVybiBJbnRlZ2VyVHlwZSgpCiAgZWxpZiBmID09ICdmbG9hdDY0JzogcmV0dXJuIEZsb2F0VHlwZSgpCiAgZWxzZTogcmV0dXJuIFN0cmluZ1R5cGUoKQoKZGVmIGRlZmluZV9zdHJ1Y3R1cmUoc3RyaW5nLCBmb3JtYXRfdHlwZSk6CiAgdHJ5OiB0eXBvID0gZXF1aXZhbGVudF90eXBlKGZvcm1hdF90eXBlKQogIGV4Y2VwdDogdHlwbyA9IFN0cmluZ1R5cGUoKQogIHJldHVybiBTdHJ1Y3RGaWVsZChzdHJpbmcsIHR5cG8pCgpkZWYgcGFuZGFzX3RvX3NwYXJrKGRmX3BhbmRhcyk6CiAgY29sdW1ucyA9IGxpc3QoZGZfcGFuZGFzLmNvbHVtbnMpCiAgdHlwZXMgPSBsaXN0KGRmX3BhbmRhcy5kdHlwZXMpCiAgc3RydWN0X2xpc3QgPSBbXQogIGZvciBjb2x1bW4sIHR5cG8gaW4gemlwKGNvbHVtbnMsIHR5cGVzKTogCiAgICBzdHJ1Y3RfbGlzdC5hcHBlbmQoZGVmaW5lX3N0cnVjdHVyZShjb2x1bW4sIHR5cG8pKQogIHBfc2NoZW1hID0gU3RydWN0VHlwZShzdHJ1Y3RfbGlzdCkKICByZXR1cm4gc3FsQ29udGV4dC5jcmVhdGVEYXRhRnJhbWUoZGZfcGFuZGFzLCBwX3NjaGVtYSkgCgoKc2RmID0gcGFuZGFzX3RvX3NwYXJrKGRmKQpwZXJtYW5lbnRfdGFibGVfbmFtZSA9IHN5cy5hcmd2WzFdCgp0cnk6CiAgICBzZGYud3JpdGUuc2F2ZUFzVGFibGUocGVybWFuZW50X3RhYmxlX25hbWUpCmV4Y2VwdDoKICAgIHNkZi53cml0ZS5pbnNlcnRJbnRvKHBlcm1hbmVudF90YWJsZV9uYW1lLG92ZXJ3cml0ZT1GYWxzZSkKCg==`,
+        }),
     }
-
 
     await uploadFileForDBFS(uploadFileForRequest, global)
 
-    const closeFileRequest = { 
-        ...global.options, 
+    const closeFileRequest = {
+        ...global.options,
         body: JSON.stringify({
             handle: handle,
-        })
+        }),
     }
 
     await closeFileForDBFS(closeFileRequest, global)
@@ -52,9 +51,9 @@ function transformEventToRow(fullEvent) {
     console.log(properties)
     // only move prop to elements for the $autocapture action
     if (event === '$autocapture' && properties?.['$elements']) {
-        const { $elements, ...props } = properties
-        ingestedProperties = props
-        elements = $elements
+        const { ...props } = properties
+
+        elements = props
     }
 
     return {
@@ -84,9 +83,14 @@ async function exportEvents(events, { global, storage }) {
 
     rows = rows.join().split('\n')
 
-
-    const data = await storage.get('data', [])
-
+    let data = null
+    // this is an intentional change as testing storage with posthog is a little difficult to simulate
+    if (!global.tests) {
+        data = await storage.get('data', null)
+    }
+    if (data === null) {
+        data = []
+    }
 
     rows.forEach((row) => {
         if (row.length >= 0) {
@@ -184,7 +188,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
                     depends_on: [],
                     existing_cluster_id: `${config.clusterId}`,
                     spark_python_task: {
-                        python_file: 'dbfs:/tmp/posthog_upload.py',
+                        python_file: `dbfs:${config.pythonSupportFileUpload}`,
                     },
                     libraries: [],
                     timeout_seconds: 86400,
@@ -237,7 +241,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
 
         request.body = JSON.stringify({
             job_id: job_id,
-            python_params: [`${config.dbName}`],
+            python_params: [`${config.dbName}`, `${config.fileName}`],
         })
 
         response = await fetchWithRetry(`${global.url}/api/2.1/jobs/run-now`, request, 'POST')

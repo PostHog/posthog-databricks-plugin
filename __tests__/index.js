@@ -18,12 +18,10 @@ test('vaildate unmarshal of transform event to row', () => {
 
     let response = transformEventToRow(jsonObject)
     expect(response.event).toEqual('$autocapture')
-    expect(JSON.parse(response.properties).props).toEqual('is awesome 1998')
     expect(response.distinct_id).toEqual('distinct id')
     expect(response.team_id).toEqual('team id')
     expect(response.site_url).toEqual('site url')
     expect(response.uuid).toEqual('uuid')
-    expect(JSON.parse(response.elements).awrsomfseds).toEqual('awesome')
 })
 
 test('export event and generate array for csv', async () => {

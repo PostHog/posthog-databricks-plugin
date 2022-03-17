@@ -13,6 +13,7 @@
             "name": "Domain Name",
             "type": "string",
             "default": "",
+            "description": "Domain name of your databrics cloud instance",
             "required": true
         },
         {
@@ -20,6 +21,7 @@
             "name": "API Key",
             "type": "string",
             "default": "",
+            "description": "API key of your databrics cloud instance",
             "required": true
         },
         {
@@ -27,7 +29,15 @@
             "name": "File Name",
             "type": "string",
             "default": "/tmp/posthog.csv",
-            "description": "Default filename created in the dbfs please update incase you dont want to override thid file",
+            "description": "Default filename for the csv file",
+            "required": true
+        },
+        {
+            "key": "pythonSupportFileUpload",
+            "name": "Python Support File Upload",
+            "type": "string",
+            "default": "/tmp/posthog_upload.py",
+            "description": "Default filename for python job file",
             "required": true
         },
         {
@@ -43,6 +53,7 @@
             "name": "Database Name",
             "type": "string",
             "default": "",
+            "description": "Database name to store the data",
             "required": true
         },
         {
@@ -50,6 +61,7 @@
             "name": "Events to Ignore",
             "type": "string",
             "default": "",
+            "description": "Events to ignore",
             "required": false
         }
     ]
