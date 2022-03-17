@@ -48,7 +48,6 @@ function transformEventToRow(fullEvent) {
     let ingestedProperties = null
     let elements = null
 
-    console.log(properties)
     // only move prop to elements for the $autocapture action
     if (event === '$autocapture' && properties?.['$elements']) {
         const { ...props } = properties
@@ -145,7 +144,6 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     })
 
     const handle = await createFileForDBFS(request, global)
-    console.log('handle', handle)
 
     let data = await storage.get('data', null)
     if (!data) {
@@ -166,7 +164,6 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
             data: contentBase64,
         })
         await uploadFileForDBFS(request, global)
-        console.log('data uploaded', request.body)
     }
 
     await storage.set('data', [])
@@ -176,7 +173,6 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
     })
 
     await closeFileForDBFS(request, global)
-    console.log('closed', request.body)
 
     if (isDataNull) {
         request.body = JSON.stringify({
@@ -230,14 +226,12 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
             })
             const response = await fetchWithRetry(`${global.url}/api/2.1/jobs/delete`, request, 'POST')
             const result = await response.json()
-            console.log('result', result)
         }
 
         let response = await fetchWithRetry(`${global.url}/api/2.1/jobs/create`, request, 'POST')
         let result = await response.json()
-        console.log('result', result)
+
         job_id = result.job_id
-        console.log('job_id', job_id)
 
         request.body = JSON.stringify({
             job_id: job_id,
@@ -246,7 +240,7 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
 
         response = await fetchWithRetry(`${global.url}/api/2.1/jobs/run-now`, request, 'POST')
         result = await response.json()
-        console.log('result', result)
+
         await cache.set('job_id', job_id)
     }
 }
