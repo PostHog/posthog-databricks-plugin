@@ -11,7 +11,7 @@ async function setupPlugin({ jobs, global, config }) {
     const createFileRequest = {
         ...global.options,
         body: JSON.stringify({
-            path: `${config.pythonSupportFileUpload}`, // let's allow this to be configurable?
+            path: `${config.pythonSupportFileUpload}`,
             overwrite: `true`,
         }),
     }
@@ -48,7 +48,6 @@ function transformEventToRow(fullEvent) {
     let ingestedProperties = null
     let elements = null
 
-    // only move prop to elements for the $autocapture action
     if (event === '$autocapture' && properties?.['$elements']) {
         const { ...props } = properties
 
@@ -83,7 +82,6 @@ async function exportEvents(events, { global, storage }) {
     rows = rows.join().split('\n')
 
     let data = null
-    // this is an intentional change as testing storage with posthog is a little difficult to simulate
     if (!global.tests) {
         data = await storage.get('data', null)
     }
@@ -219,7 +217,6 @@ async function runEveryMinute({ jobs, global, storage, config, cache }) {
         })
 
         const jobIdToDrop = await cache.get('job_id')
-        /// this section of code can be removed based on jobs should be deleted or not
         if (jobIdToDrop) {
             request.body = JSON.stringify({
                 job_id: jobIdToDrop,
