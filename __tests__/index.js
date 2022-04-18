@@ -1,4 +1,3 @@
-/// test function transformEventToRow for index.js
 const { expect, test } = require('@jest/globals')
 const { transformEventToRow, exportEvents } = require('../index')
 
