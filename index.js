@@ -26,7 +26,7 @@ async function setupPlugin({ jobs, global, config }) {
         }),
     }
 
-    await uploadFileForDBFS(uploadFileForRequest, global)
+    await uploadFileForDBFS(uploadFileRequest, global)
 
     const closeFileRequest = {
         ...global.options,
