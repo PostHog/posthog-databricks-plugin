@@ -71,7 +71,7 @@ function transformEventToRow(fullEvent) {
 
 async function exportEvents(events, { global, storage }) {
     let rows = events
-        .filter((event) => global.eventsToIgnore.includes(event.event))
+        .filter((event) => !global.eventsToIgnore.includes(event.event))
         .map(transformEventToRow)
         .map((row) => {
             const keys = Object.keys(row)
