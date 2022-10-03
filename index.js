@@ -205,6 +205,7 @@ async function runEveryMinute({ global, storage, config, cache }) {
     await closeFileForDBFS(request, global)
 
     if (isDataNull) {
+        // This is buggy - we override this before the right request.
         request.body = JSON.stringify({
             name: 'A python job to push data into db',
             tasks: [
