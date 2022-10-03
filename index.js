@@ -108,11 +108,7 @@ async function fetchWithRetry(url, options = {}, method = 'GET', isRetry = false
         const res = await fetch(url, { method: method, ...options })
         return res
     } catch {
-        if (isRetry) {
-            throw new Error(`${method} request to ${url} failed.`)
-        }
-        const res = await fetchWithRetry(url, options, (method = method), (isRetry = true))
-        return res
+        throw RetryError()
     }
 }
 
