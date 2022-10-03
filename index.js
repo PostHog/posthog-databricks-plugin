@@ -1,4 +1,4 @@
-async function setupPlugin({ jobs, global, config }) {
+async function setupPlugin({ global, config }) {
     global.url = `https://${config.DomainName}`
 
     global.options = {
@@ -128,7 +128,7 @@ async function closeFileForDBFS(request, global) {
     await response.json()
 }
 
-async function runEveryMinute({ jobs, global, storage, config, cache }) {
+async function runEveryMinute({ global, storage, config, cache }) {
     let request = global.options
     let isDataNull = false
     let job_id = null
