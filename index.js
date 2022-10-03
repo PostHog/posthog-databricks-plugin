@@ -1,3 +1,39 @@
+const PYTHON_SUPPORT_FILE_CONTENT = `import sys
+import pandas as pd
+
+df = pd.read_csv('/dbfs/{}'.format(sys.argv[2]), sep='|',delimiter=None)
+from pyspark.sql.types import *
+
+def equivalent_type(f):
+  if f == 'datetime64[ns]': return DateType()
+  elif f == 'int64': return LongType()
+  elif f == 'int32': return IntegerType()
+  elif f == 'float64': return FloatType()
+  else: return StringType()
+
+def define_structure(string, format_type):
+  try: typo = equivalent_type(format_type)
+  except: typo = StringType()
+  return StructField(string, typo)
+
+def pandas_to_spark(df_pandas):
+  columns = list(df_pandas.columns)
+  types = list(df_pandas.dtypes)
+  struct_list = []
+  for column, typo in zip(columns, types):
+    struct_list.append(define_structure(column, typo))
+  p_schema = StructType(struct_list)
+  return sqlContext.createDataFrame(df_pandas, p_schema)
+
+
+sdf = pandas_to_spark(df)
+permanent_table_name = sys.argv[1]
+
+try:
+    sdf.write.saveAsTable(permanent_table_name)
+except:
+    sdf.write.insertInto(permanent_table_name,overwrite=False)`
+
 async function setupPlugin({ global, config }) {
     global.url = `https://${config.DomainName}`
 
@@ -22,7 +58,7 @@ async function setupPlugin({ global, config }) {
         ...global.options,
         body: JSON.stringify({
             handle: handle,
-            data: `aW1wb3J0IHN5cwppbXBvcnQgcGFuZGFzIGFzIHBkCgpkZiA9IHBkLnJlYWRfY3N2KCcvZGJmcy97fScuZm9ybWF0KHN5cy5hcmd2WzJdKSwgc2VwPSd8JyxkZWxpbWl0ZXI9Tm9uZSkKZnJvbSBweXNwYXJrLnNxbC50eXBlcyBpbXBvcnQgKgoKZGVmIGVxdWl2YWxlbnRfdHlwZShmKToKICBpZiBmID09ICdkYXRldGltZTY0W25zXSc6IHJldHVybiBEYXRlVHlwZSgpCiAgZWxpZiBmID09ICdpbnQ2NCc6IHJldHVybiBMb25nVHlwZSgpCiAgZWxpZiBmID09ICdpbnQzMic6IHJldHVybiBJbnRlZ2VyVHlwZSgpCiAgZWxpZiBmID09ICdmbG9hdDY0JzogcmV0dXJuIEZsb2F0VHlwZSgpCiAgZWxzZTogcmV0dXJuIFN0cmluZ1R5cGUoKQoKZGVmIGRlZmluZV9zdHJ1Y3R1cmUoc3RyaW5nLCBmb3JtYXRfdHlwZSk6CiAgdHJ5OiB0eXBvID0gZXF1aXZhbGVudF90eXBlKGZvcm1hdF90eXBlKQogIGV4Y2VwdDogdHlwbyA9IFN0cmluZ1R5cGUoKQogIHJldHVybiBTdHJ1Y3RGaWVsZChzdHJpbmcsIHR5cG8pCgpkZWYgcGFuZGFzX3RvX3NwYXJrKGRmX3BhbmRhcyk6CiAgY29sdW1ucyA9IGxpc3QoZGZfcGFuZGFzLmNvbHVtbnMpCiAgdHlwZXMgPSBsaXN0KGRmX3BhbmRhcy5kdHlwZXMpCiAgc3RydWN0X2xpc3QgPSBbXQogIGZvciBjb2x1bW4sIHR5cG8gaW4gemlwKGNvbHVtbnMsIHR5cGVzKTogCiAgICBzdHJ1Y3RfbGlzdC5hcHBlbmQoZGVmaW5lX3N0cnVjdHVyZShjb2x1bW4sIHR5cG8pKQogIHBfc2NoZW1hID0gU3RydWN0VHlwZShzdHJ1Y3RfbGlzdCkKICByZXR1cm4gc3FsQ29udGV4dC5jcmVhdGVEYXRhRnJhbWUoZGZfcGFuZGFzLCBwX3NjaGVtYSkgCgoKc2RmID0gcGFuZGFzX3RvX3NwYXJrKGRmKQpwZXJtYW5lbnRfdGFibGVfbmFtZSA9IHN5cy5hcmd2WzFdCgp0cnk6CiAgICBzZGYud3JpdGUuc2F2ZUFzVGFibGUocGVybWFuZW50X3RhYmxlX25hbWUpCmV4Y2VwdDoKICAgIHNkZi53cml0ZS5pbnNlcnRJbnRvKHBlcm1hbmVudF90YWJsZV9uYW1lLG92ZXJ3cml0ZT1GYWxzZSkKCg==`,
+            data: Buffer.from(PYTHON_SUPPORT_FILE_CONTENT).toString('base64')
         }),
     }
 
