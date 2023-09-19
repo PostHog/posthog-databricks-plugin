@@ -1,3 +1,5 @@
+Recommended alternative for PostHog cloud users: S3 batch exports
+
 # PostHog Databricks Plugin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg?style=flat-square)](https://opensource.org/licenses/MIT)
