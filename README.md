@@ -1,7 +1,6 @@
-Recommended alternative for PostHog cloud users: S3 batch exports
-
 # PostHog Databricks Plugin
 
+> ℹ️ This plugin is only available for self-hosted users. Users of PostHog cloud should look into [S3 batch exports](https://posthog.com/docs/cdp/batch-exports/s3) and [connecting databricks to S3](https://docs.databricks.com/en/storage/amazon-s3.html) as an alternative.
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
 ## Installation
